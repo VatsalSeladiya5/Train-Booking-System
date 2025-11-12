@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TrainLink | Payment</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="logo">
+        <i class="ri-train-line"></i> TrainLink
+      </div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="booking.html">Book</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </header>
+
+    <section class="payment-section">
+      <h2>Complete Your Payment</h2>
+
+      <div id="summaryBox" class="train-summary"></div>
+
+      <h3>Choose Payment Method</h3>
+      <div class="payment-method">
+        <label>
+          <input type="radio" name="payMethod" value="card" checked /> Card
+        </label>
+        <label>
+          <input type="radio" name="payMethod" value="upi" /> UPI
+        </label>
+      </div>
+
+      <div id="cardPayment" class="payment-form">
+        <div class="form-group">
+          <label>Card Number</label>
+          <input id="cardNumber" type="text" placeholder="1234 5678 9012 3456" maxlength="16" />
+        </div>
+        <div class="form-group">
+          <label>Expiry Date</label>
+          <input id="cardExpiry" type="month" />
+        </div>
+        <div class="form-group">
+          <label>CVV</label>
+          <input id="cardCVV" type="password" maxlength="3" />
+        </div>
+      </div>
+
+      <div id="upiPayment" class="payment-form hidden">
+        <div class="form-group">
+          <label>UPI ID</label>
+          <input id="upiId" type="text" placeholder="example@upi" />
+        </div>
+      </div>
+
+      <p id="payError" style="color:red;"></p>
+      <button id="payNow" class="btn-primary">
+        <i class="ri-bank-card-line"></i> Pay Now
+      </button>
+    </section>
+
+    <footer>
+      <p>© 2025 TrainLink. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+      document.getElementById("payNow").addEventListener("click", function (e) {
+        const payMethod = document.querySelector('input[name="payMethod"]:checked').value;
+        const error = document.getElementById("payError");
+        error.textContent = "";
+
+        if (payMethod === "card") {
+          const num = document.getElementById("cardNumber").value.trim();
+          const cvv = document.getElementById("cardCVV").value.trim();
+          const exp = document.getElementById("cardExpiry").value.trim();
+          if (!num || num.length < 12 || !cvv || cvv.length < 3 || !exp) {
+            error.textContent = "⚠ Please enter valid card details (16-digit number, CVV, expiry).";
+            e.preventDefault();
+            return;
+          }
+        } else {
+          const upi = document.getElementById("upiId").value.trim();
+          if (!upi || !upi.includes("@")) {
+            error.textContent = "⚠ Please enter a valid UPI ID (example@upi).";
+            e.preventDefault();
+            return;
+          }
+        }
+      });
+    </script>
+    <script src="main.js"></script>
+  </body>
+</html>

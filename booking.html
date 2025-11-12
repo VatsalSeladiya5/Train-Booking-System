@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <head>
+
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>TrainLink | Book Trains</title>
+
+    <link rel="stylesheet" href="style.css" />
+
+    <link
+
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+
+      rel="stylesheet"
+
+    />
+
+  </head>
+
+  <body>
+
+    <header class="navbar">
+
+      <div class="logo">
+
+        <i class="ri-train-line"></i> TrainLink
+
+      </div>
+
+      <nav>
+
+        <a href="index.html">Home</a>
+
+        <a href="booking.html">Book</a>
+
+        <a href="about.html">About</a>
+
+        <a href="contact.html">Contact</a>
+
+      </nav>
+
+    </header>
+
+
+
+    <section class="booking-section">
+
+      <h2>Book Your Train Journey</h2>
+
+      <div class="booking-form">
+
+        <div class="form-grid">
+
+          <div class="form-group">
+
+            <label for="from">From</label>
+
+            <select id="from">
+
+              <option value="">Select Source</option>
+
+              <option>Delhi</option>
+
+              <option>Mumbai</option>
+
+              <option>Bangalore</option>
+
+              <option>Kolkata</option>
+
+              <option>Chennai</option>
+
+              <option>Hyderabad</option>
+
+              <option>Pune</option>
+
+              <option>Ahmedabad</option>
+
+              <option>Lucknow</option>
+
+              <option>Jaipur</option>
+
+            </select>
+
+          </div>
+
+
+
+          <div class="form-group">
+
+            <label for="to">To</label>
+
+            <select id="to">
+
+              <option value="">Select Destination</option>
+
+              <option>Delhi</option>
+
+              <option>Mumbai</option>
+
+              <option>Bangalore</option>
+
+              <option>Kolkata</option>
+
+              <option>Chennai</option>
+
+              <option>Hyderabad</option>
+
+              <option>Pune</option>
+
+              <option>Ahmedabad</option>
+
+              <option>Lucknow</option>
+
+              <option>Jaipur</option>
+
+            </select>
+
+          </div>
+
+
+
+          <div class="form-group">
+
+            <label for="date">Date of Journey</label>
+
+            <input type="date" id="date" />
+
+          </div>
+
+
+
+          <div class="form-group">
+
+            <label for="class">Class</label>
+
+            <select id="class">
+
+              <option value="">Select Class</option>
+
+              <option>Sleeper</option>
+
+              <option>AC 3 Tier</option>
+
+              <option>AC 2 Tier</option>
+
+              <option>First Class</option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+
+        <p id="bookError" style="color:red;"></p>
+
+        <button id="searchTrains" class="btn-primary">
+
+          <i class="ri-search-line"></i> Search Trains
+
+        </button>
+
+      </div>
+
+
+
+      <div class="train-list"></div>
+
+    </section>
+
+
+
+    <footer>
+
+      <p>© 2025 TrainLink. All Rights Reserved.</p>
+
+    </footer>
+
+
+
+    <script>
+
+      document.getElementById("searchTrains").addEventListener("click", function () {
+
+        const from = document.getElementById("from").value;
+
+        const to = document.getElementById("to").value;
+
+        const date = document.getElementById("date").value;
+
+        const travelClass = document.getElementById("class").value;
+
+        const error = document.getElementById("bookError");
+
+        error.textContent = "";
+
+
+
+        if (!from || !to || !date || !travelClass) {
+
+          error.textContent = "⚠ Please fill all fields before searching.";
+
+          return;
+
+        }
+
+        if (from === to) {
+
+          error.textContent = "❌ Source and destination cannot be the same.";
+
+          return;
+
+        }
+
+        const chosen = new Date(date);
+
+        const today = new Date();
+
+        today.setHours(0, 0, 0, 0);
+
+        if (chosen < today) {
+
+          error.textContent = "❌ Date cannot be in the past.";
+
+          return;
+
+        }
+
+
+
+        // Pass validation — trigger main.js search logic
+
+      });
+
+    </script>
+
+    <script src="main.js"></script>
+
+  </body>
+
+</html>

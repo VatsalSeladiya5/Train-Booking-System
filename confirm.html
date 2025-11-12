@@ -1,0 +1,91 @@
+confirm.html
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TrainLink | Confirm Booking</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="logo">
+        <i class="ri-train-line"></i> TrainLink
+      </div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="booking.html">Book</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </header>
+
+    <section class="confirm-section">
+      <h2>Confirm Your Booking</h2>
+
+      <div id="selectedTrain" class="train-summary"></div>
+
+      <h3>Passenger Details</h3>
+      <div class="passenger-form">
+        <div class="form-group">
+          <label for="pname">Full Name</label>
+          <input type="text" id="pname" placeholder="Enter passenger name" />
+        </div>
+
+        <div class="form-group">
+          <label for="page">Age</label>
+          <input type="number" id="page" placeholder="Enter age" min="0" />
+        </div>
+
+        <div class="form-group">
+          <label for="pgender">Gender</label>
+          <select id="pgender">
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <p id="confirmError" style="color:red;"></p>
+        <button id="confirmBooking" class="btn-primary">
+          Proceed to Payment
+        </button>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2025 TrainLink. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+      document.getElementById("confirmBooking").addEventListener("click", function (e) {
+        const name = document.getElementById("pname").value.trim();
+        const age = document.getElementById("page").value.trim();
+        const gender = document.getElementById("pgender").value;
+        const error = document.getElementById("confirmError");
+        error.textContent = "";
+
+        if (!name || !age || !gender) {
+          error.textContent = "⚠ Please fill all fields (name, age, and gender).";
+          e.preventDefault();
+          return;
+        }
+        if (isNaN(age) || age <= 0) {
+          error.textContent = "❌ Please enter a valid age.";
+          e.preventDefault();
+          return;
+        }
+      });
+    </script>
+    <script src="main.js"></script>
+  </body>
+</html>

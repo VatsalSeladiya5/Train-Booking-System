@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TrainLink | Booking Successful</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="logo">
+        <i class="ri-train-line"></i> TrainLink
+      </div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="booking.html">Book</a>
+        <a href="#" class="active">Ticket</a>
+      </nav>
+    </header>
+
+    <section class="success-section">
+      <div class="success-icon">
+        <i class="ri-check-double-line"></i>
+      </div>
+      <h2>Booking Confirmed!</h2>
+      <p>Your train ticket has been successfully booked.</p>
+
+      <div id="ticketDetails" class="ticket-box">
+        <!-- Ticket info filled via main.js -->
+      </div>
+
+      <div class="success-buttons">
+        <button id="downloadTicket" class="btn-primary">
+          <i class="ri-printer-line"></i> Print / Download Ticket
+        </button>
+        <a href="booking.html" class="btn-secondary">
+          <i class="ri-arrow-left-line"></i> Book Another Train
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2025 TrainLink. All Rights Reserved.</p>
+    </footer>
+
+    <script src="main.js"></script>
+  </body>
+</html>

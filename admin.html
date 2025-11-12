@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TrainLink — Admin Dashboard</title>
+
+
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    
+    :root{
+      --bg:#f5f8f9; --card:#fff; --accent:#085c6b; --accent-2:#19a39a; --muted:#6b7b7b;
+      --danger:#d9534f;
+    }
+    *{box-sizing:border-box;font-family:Inter,Ui-sans-serif,Segoe UI,Arial;margin:0;padding:0}
+    body{background:var(--bg);color:var(--accent);min-height:100vh}
+    header{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    header h1{font-size:1.05rem;letter-spacing:.2px}
+    .layout{display:grid;grid-template-columns:240px 1fr;gap:18px;padding:18px}
+    @media(max-width:900px){ .layout{grid-template-columns:1fr} .sidebar{position:static} }
+
+   
+    .sidebar{background:var(--card);border-radius:10px;padding:12px;height:calc(100vh - 112px);position:sticky;top:18px;box-shadow:0 8px 24px rgba(9,30,31,0.06);overflow:auto}
+    .nav-item{padding:10px 12px;border-radius:8px;color:var(--accent);display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600}
+    .nav-item:hover{background:#f0fcfb}
+    .nav-item.active{background:linear-gradient(90deg, rgba(15,107,110,0.06), rgba(25,163,154,0.04));border-left:4px solid var(--accent)}
+    .small{font-size:.85rem;color:var(--muted)}
+
+    .main{min-height:400px}
+    .card{background:var(--card);border-radius:10px;padding:14px;box-shadow:0 10px 30px rgba(9,30,31,0.04);margin-bottom:16px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .flex{display:flex;gap:10px;align-items:center}
+    .btn{padding:.5rem .8rem;border-radius:8px;border:none;cursor:pointer;font-weight:700}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff}
+    .btn-ghost{background:transparent;border:1px solid rgba(9,30,31,0.06)}
+    .btn-danger{background:var(--danger);color:#fff}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border-bottom:1px solid #f1f4f4;text-align:left;font-size:.95rem}
+    th{background:#fbffff;font-weight:700}
+    input,select,textarea{padding:.55rem;border-radius:8px;border:1px solid #e6eef0;width:100%}
+    .muted{color:var(--muted)}
+    .search{display:flex;gap:8px;align-items:center}
+    .no-items{padding:16px;color:var(--muted)}
+    .small-muted{font-size:.85rem;color:var(--muted)}
+    footer{padding:12px;text-align:center;color:var(--muted);font-size:.85rem}
+    .passenger-list { font-size: .95rem; color: #0b3b3b; }
+    .passenger-item { margin-bottom: 6px; }
+
+   
+   .login-overlay-ultra {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeInOverlay 0.5s ease forwards;
+}
+@keyframes fadeInOverlay {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+.login-card-ultra {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 36px 48px;
+  width: 400px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 0 0 1px rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #f0f5f9;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  animation: slideUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+@keyframes slideUp {
+  from {opacity: 0; transform: translateY(40px);}
+  to   {opacity: 1; transform: translateY(0);}
+}
+.btn-glow:hover, .btn-glow:focus {
+  box-shadow: 0 0 24px 4px #19a39a, 0 0 36px 8px #0ff;
+  outline: none;
+}
+.btn-cancel:hover, .btn-cancel:focus {
+  background: #19a39a22;
+  border-color: #19a39a;
+  color: #19a39a;
+  outline: none;
+}
+
+  </style>
+</head>
+<body>
+ 
+<div id="loginOverlay" class="login-overlay-ultra">
+  <div class="login-card-ultra" role="dialog" aria-modal="true" aria-labelledby="loginTitleUltra">
+    <h2 id="loginTitleUltra">Welcome Back, Admin</h2>
+    <p class="login-subtitle" style="margin-bottom:12px; text-align:center; color:#cbd5e1; font-weight:400;">Please enter your credentials to access the dashboard</p>
+    <div class="login-row-ultra" style="margin-bottom:18px;">
+      <label for="loginUser" style="color:#a8bcd9; font-size:0.9rem; margin-bottom:6px; display:block; font-weight:600;">Username</label>
+      <input id="loginUser" placeholder="admin" autocomplete="username"
+             style="width:100%; padding:12px 14px; border-radius:12px; border:none; background:rgba(255,255,255,0.15); color:#fff; font-size:1rem; font-weight:600; outline-offset:2px;" />
+    </div>
+    <div class="login-row-ultra" style="margin-bottom:18px;">
+      <label for="loginPass" style="color:#a8bcd9; font-size:0.9rem; margin-bottom:6px; display:block; font-weight:600;">Password</label>
+      <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password"
+             style="width:100%; padding:12px 14px; border-radius:12px; border:none; background:rgba(255,255,255,0.15); color:#fff; font-size:1rem; font-weight:600; outline-offset:2px;" />
+    </div>
+    <div class="login-actions-ultra" style="display:flex; justify-content:center; gap:16px; margin-top:12px;">
+      <button id="loginBtn" class="btn btn-primary btn-glow"
+              style="background:linear-gradient(90deg,#0ff,#19a39a); color:#002e2e; font-weight:700; border-radius:12px; padding:12px 32px; box-shadow:0 0 12px #19a39a, 0 0 20px #0ff; border:none; cursor:pointer; letter-spacing:0.05em;">Log In</button>
+      <button id="loginCancel" class="btn btn-ghost btn-cancel"
+              style="background:transparent; color:#a8bcd9; border:2px solid transparent; font-weight:600; letter-spacing:0.05em; padding:12px 32px; border-radius:12px; border-color:#476a7b; transition:all 0.3s ease; cursor:pointer;">Cancel</button>
+    </div>
+    <div id="loginError" class="login-error-ultra" style="margin-top:15px; text-align:center; font-weight:600; color:#ff6b6b; font-size:0.95rem; display:none;">
+      Invalid username or password
+    </div>
+  </div>
+</div>
+
+  
+
+  <header>
+    <div style="display:flex;gap:12px;align-items:center">
+      <div style="font-size:1.6rem"><i class="ri-train-line"></i></div>
+      <div>
+        <h1>TrainLink — Admin Dashboard</h1>
+        <div class="small">Client-side admin (demo) • Data stored in localStorage</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button id="btnSync" class="btn btn-ghost" title="Sync latest frontend ticket to history"><i class="ri-refresh-line"></i>&nbsp;Sync</button>
+      <button id="btnLogout" class="btn btn-danger"><i class="ri-logout-box-r-line"></i>&nbsp;Logout</button>
+    </div>
+  </header>
+
+  <div class="layout">
+ 
+    <aside class="sidebar">
+      <div style="margin-bottom:12px"><strong>Admin</strong><div class="small-muted">manage trains, bookings & reports</div></div>
+      <div id="navDashboard" class="nav-item active" data-page="dashboard"><i class="ri-dashboard-line"></i> Dashboard</div>
+      <div id="navTrains" class="nav-item" data-page="trains"><i class="ri-train-line"></i> Train Management</div>
+      <div id="navBookings" class="nav-item" data-page="bookings"><i class="ri-ticket-line"></i> Booking Management</div>
+      <div id="navUsers" class="nav-item" data-page="users"><i class="ri-user-line"></i> User Management</div>
+      <div id="navReports" class="nav-item" data-page="reports"><i class="ri-bar-chart-line"></i> Reports & Analytics</div>
+
+      <hr style="margin:12px 0" />
+      <div class="small-muted">Storage</div>
+      <div style="margin-top:8px;" class="small-muted">trains: <span id="countTrains">0</span> • bookings: <span id="countBookings">0</span> • users: <span id="countUsers">0</span></div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button id="btnExport" class="btn btn-ghost"><i class="ri-download-line"></i>&nbsp;Export CSV</button>
+        <button id="btnClearAll" class="btn btn-ghost" title="Clear tickets history">Clear Tickets</button>
+      </div>
+    </aside>
+
+    <main class="main">
+   
+      <section id="page-dashboard" class="card page">
+        <div class="grid-3" style="margin-bottom:12px">
+          <div class="card">
+            <div class="small-muted">Total Trains</div>
+            <div style="font-size:1.4rem;font-weight:800" id="kpiTrains">0</div>
+            <div class="small-muted">Manage available train list</div>
+          </div>
+          <div class="card">
+            <div class="small-muted">Total Bookings</div>
+            <div style="font-size:1.4rem;font-weight:800" id="kpiBookings">0</div>
+            <div class="small-muted">Total bookings recorded</div>
+          </div>
+          <div class="card">
+            <div class="small-muted">Total Users</div>
+            <div style="font-size:1.4rem;font-weight:800" id="kpiUsers">0</div>
+            <div class="small-muted">Unique passengers / users</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong>Recent Bookings</strong><div class="small-muted">Latest 8 bookings</div></div>
+            <div class="small-muted">Quick actions</div>
+          </div>
+          <div id="recentBookings" style="margin-top:12px"></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <strong>Quick Stats</strong>
+            <ul style="margin-top:8px">
+              <li id="statRevenue" class="small-muted">Total revenue: ₹0</li>
+              <li id="statThisMonth" class="small-muted">Bookings this month: 0</li>
+              <li id="statPopular" class="small-muted">Most booked train: —</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Actions</strong>
+            <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+              <button id="btnRefresh" class="btn btn-primary">Refresh Data</button>
+              <button id="btnSeed" class="btn btn-ghost">Seed Demo Data</button>
+              <button id="btnClearStorage" class="btn btn-danger">Clear All Storage</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-trains" class="card page" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Train Management</strong><div class="small-muted">Add / edit / delete trains</div></div>
+          <div style="display:flex;gap:8px">
+            <input id="searchTrains" placeholder="Search train name/from/to" />
+            <button id="btnAddTrain" class="btn btn-primary">New Train</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:12px">
+          <div style="flex:1">
+            <div id="trainsList" class="card" style="max-height:520px;overflow:auto"></div>
+          </div>
+          <div style="width:380px">
+            <div class="card">
+              <strong id="trainFormTitle">Add Train</strong>
+              <div style="margin-top:8px">
+                <input id="tfId" type="hidden">
+                <label class="small-muted">Name</label>
+                <input id="tfName" placeholder="Green Express" />
+                <label class="small-muted">From</label>
+                <input id="tfFrom" placeholder="Delhi" />
+                <label class="small-muted">To</label>
+                <input id="tfTo" placeholder="Mumbai" />
+                <label class="small-muted">Departure Time</label>
+                <input id="tfTime" placeholder="06:00 AM" />
+                <label class="small-muted">Fare (₹)</label>
+                <input id="tfFare" type="number" placeholder="1200" />
+                <div style="margin-top:8px;display:flex;gap:8px">
+                  <button id="btnSaveTrain" class="btn btn-primary">Save</button>
+                  <button id="btnCancelTrain" class="btn btn-ghost">Cancel</button>
+                </div>
+              </div>
+            </div>
+            <div class="card small-muted" style="margin-top:12px">Trains are saved in <code>localStorage.trains</code>. Changes reflect for the frontend after reload.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-bookings" class="card page" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Booking Management</strong><div class="small-muted">View, search, filter and export bookings</div></div>
+          <div style="display:flex;gap:8px">
+            <input id="searchBookings" placeholder="Search booking id / train / passenger" />
+            <input id="filterBookingDate" type="date" />
+            <button id="btnExportBookings" class="btn btn-ghost">Export CSV</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div id="bookingsTable" class="card" style="max-height:520px;overflow:auto"></div>
+        </div>
+      </section>
+
+      <section id="page-users" class="card page" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>User Management</strong><div class="small-muted">Passengers extracted from bookings</div></div>
+          <div><input id="searchUsers" placeholder="Search by name/email/phone" /></div>
+        </div>
+
+        <div style="margin-top:12px" id="usersTable" class="card" style="max-height:560px;overflow:auto"></div>
+      </section>
+
+      <section id="page-reports" class="card page" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Reports & Analytics</strong><div class="small-muted">Interactive charts</div></div>
+          <div class="small-muted">Charts powered by Chart.js</div>
+        </div>
+
+        <div class="grid-2" style="margin-top:12px">
+          <div class="card">
+            <strong>Bookings per Train</strong>
+            <canvas id="chartBookingsPerTrain" style="height:220px"></canvas>
+          </div>
+          <div class="card">
+            <strong>Revenue by Train</strong>
+            <canvas id="chartRevenueByTrain" style="height:220px"></canvas>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="card">
+          <strong>Monthly Bookings</strong>
+          <canvas id="chartMonthly" style="height:120px"></canvas>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>TrainLink Admin • Demo (client-side only)</footer>
+
+  <script>
+
+  (function(){
+    const CORRECT_USER = 'admin';
+    const CORRECT_PW = 'admin123';
+    const overlay = document.getElementById('loginOverlay');
+    const userEl = document.getElementById('loginUser');
+    const passEl = document.getElementById('loginPass');
+    const btn = document.getElementById('loginBtn');
+    const cancel = document.getElementById('loginCancel');
+    const err = document.getElementById('loginError');
+
+    function showError(){ err.style.display='block'; }
+    function hideError(){ err.style.display='none'; }
+
+    function tryLogin(){
+      hideError();
+      const u = (userEl.value || '').trim();
+      const p = (passEl.value || '');
+      if(u === CORRECT_USER && p === CORRECT_PW){
+ 
+        overlay.style.display = 'none';
+        
+        setTimeout(() => { try{ runApp(); } catch(e){ console.error(e); } }, 10);
+      } else {
+        showError();
+      }
+    }
+
+    btn.addEventListener('click', tryLogin);
+    passEl.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') tryLogin(); });
+    userEl.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') { passEl.focus(); } });
+    cancel.addEventListener('click', ()=>{ /* keep on overlay but clear */ userEl.value=''; passEl.value=''; hideError(); });
+
+
+    userEl.focus();
+  })();
+
+ 
+  function runApp(){
+    (function(){
+
+    const TRAINS_KEY = 'trains';
+    const TICKETS_KEY = 'tickets'; 
+    const SINGLE_TICKET_KEY = 'ticket'; 
+
+    
+    const DEMO_TRAINS = [
+      { id: 1, name: "Green Express", from: "Delhi", to: "Mumbai", time: "06:00 AM", fare: 1200 },
+      { id: 2, name: "Southern Breeze", from: "Bangalore", to: "Chennai", time: "05:00 PM", fare: 650 },
+      { id: 3, name: "Metro Link", from: "Mumbai", to: "Bangalore", time: "10:45 AM", fare: 900 },
+      { id: 4, name: "Bayline Express", from: "Kolkata", to: "Chennai", time: "08:30 AM", fare: 1100 },
+      { id: 5, name: "Royal Deccan", from: "Pune", to: "Mumbai", time: "07:00 AM", fare: 300 },
+      { id: 6, name: "Desert King", from: "Jaipur", to: "Delhi", time: "09:15 AM", fare: 550 },
+      { id: 7, name: "Ganga Seva", from: "Lucknow", to: "Kolkata", time: "11:20 AM", fare: 1000 },
+      { id: 8, name: "Coastal Runner", from: "Chennai", to: "Mumbai", time: "04:00 PM", fare: 1150 },
+      { id: 9, name: "Hyderabad Flyer", from: "Hyderabad", to: "Bangalore", time: "02:40 PM", fare: 700 },
+      { id: 10, name: "Sabarmati Link", from: "Ahmedabad", to: "Mumbai", time: "03:30 PM", fare: 650 },
+    ];
+
+    const $ = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+    const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+
+
+    function normalizeTicket(t){
+      if(!t) return t;
+     
+      if(Array.isArray(t.passengers)) {
+  
+      } else if (t.passenger) {
+
+        t.passengers = Array.isArray(t.passenger) ? t.passenger : [t.passenger];
+      } else {
+
+        t.passengers = [];
+      }
+      
+      if(!t.passenger && t.passengers && t.passengers.length) t.passenger = t.passengers[0];
+      return t;
+    }
+
+    function readTrains(){ try{ const r = localStorage.getItem(TRAINS_KEY); return r ? JSON.parse(r) : (saveTrains(DEMO_TRAINS.slice()), DEMO_TRAINS.slice()); } catch(e){ return DEMO_TRAINS.slice(); } }
+    function saveTrains(arr){ localStorage.setItem(TRAINS_KEY, JSON.stringify(arr)); mirrorTrainsToFrontend(arr); updateCounts(); }
+    function readTickets(){ try{
+        const r = localStorage.getItem(TICKETS_KEY);
+        let hist = r ? JSON.parse(r) : [];
+     
+        const singleRaw = localStorage.getItem(SINGLE_TICKET_KEY);
+        if(singleRaw){
+          try{
+            const t0 = JSON.parse(singleRaw);
+            const normalized = normalizeTicket(t0);
+           
+            if(normalized && normalized.bookingId && !hist.find(x=>x.bookingId===normalized.bookingId)){
+              hist.unshift(normalized);
+            }
+          } catch(e){}
+        }
+        // normalize all tickets to have passengers arrays
+        hist = hist.map(normalizeTicket);
+        return hist;
+      } catch(e){ return []; } }
+    function saveTickets(arr){ // ensure tickets stored are normalized
+      const normalized = arr.map(normalizeTicket);
+      localStorage.setItem(TICKETS_KEY, JSON.stringify(normalized)); updateCounts();
+    }
+    function mirrorTrainsToFrontend(arr){ try{ localStorage.setItem('trains', JSON.stringify(arr)); } catch(e){} }
+    function readUsersFromTickets(){
+      const tickets = readTickets();
+      const map = {};
+      tickets.forEach(t => {
+        const pList = Array.isArray(t.passengers) ? t.passengers : (t.passenger ? [t.passenger] : []);
+        pList.forEach(p => {
+          const key = (p.name||'').trim().toLowerCase() + '|' + (p.age||'') + '|' + (p.gender||'');
+          if(!map[key]) map[key] = { name: p.name||'', age: p.age||'', gender: p.gender||'', bookings: [] };
+          map[key].bookings.push(t.bookingId);
+        });
+      });
+      return Object.values(map);
+    }
+
+    // ---- DOM nodes ----
+    const pages = {
+      dashboard: $('#page-dashboard'),
+      trains: $('#page-trains'),
+      bookings: $('#page-bookings'),
+      users: $('#page-users'),
+      reports: $('#page-reports')
+    };
+
+    const navItems = { dashboard: $('#navDashboard'), trains: $('#navTrains'), bookings: $('#navBookings'), users: $('#navUsers'), reports: $('#navReports') };
+
+    // header / actions
+    $('#btnLogout').onclick = () => { /* always return to login */ location.reload(); };
+    $('#btnSync').onclick = () => { syncLatestTicketToHistory(); loadAll(); alert('Synced latest ticket (if any)'); };
+    $('#btnExport').onclick = () => exportAllBookingsCSV();
+    $('#btnClearAll').onclick = () => { if(!confirm('Clear all tickets history?')) return; saveTickets([]); localStorage.removeItem(SINGLE_TICKET_KEY); loadAll(); alert('Cleared bookings'); };
+
+    // nav
+    Object.keys(navItems).forEach(k => {
+      navItems[k].onclick = () => { showPage(k); };
+    });
+
+    function showPage(name){
+      Object.values(pages).forEach(p => p.style.display = 'none');
+      pages[name].style.display = '';
+      Object.values(navItems).forEach(n => n.classList.remove('active'));
+      navItems[name].classList.add('active');
+      if(name === 'dashboard') renderDashboard();
+      if(name === 'trains') renderTrains();
+      if(name === 'bookings') renderBookings();
+      if(name === 'users') renderUsers();
+      if(name === 'reports') renderReports();
+    }
+
+    // ---- Dashboard ----
+    function renderDashboard(){
+      const trains = readTrains();
+      const tickets = readTickets();
+      const users = readUsersFromTickets();
+      $('#kpiTrains').textContent = trains.length;
+      $('#kpiBookings').textContent = tickets.length;
+      $('#kpiUsers').textContent = users.length;
+      $('#countTrains').textContent = trains.length;
+      $('#countBookings').textContent = tickets.length;
+      $('#countUsers').textContent = users.length;
+
+      // recent bookings
+      const rec = tickets.slice(0,8);
+      const html = rec.length ? rec.map(t => {
+        // show first passenger then "+n more" if multiple
+        const pcount = (t.passengers && t.passengers.length) ? t.passengers.length : 0;
+        const firstName = pcount ? (t.passengers[0].name || '') : '';
+        const more = pcount > 1 ? ` +${pcount-1} more` : '';
+        return `
+        <div style="padding:10px;border-bottom:1px solid #f1f4f4;display:flex;justify-content:space-between">
+          <div>
+            <div style="font-weight:700">${t.bookingId}</div>
+            <div class="small-muted">${t.train ? t.train.name+' • '+t.train.from+'→'+t.train.to : '—'}</div>
+            <div class="small-muted">Passenger: ${firstName}${more}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="small-muted">${t.date}</div>
+            <div style="margin-top:6px"><button class="btn btn-ghost viewBooking" data-id="${t.bookingId}">View</button></div>
+          </div>
+        </div>
+      `;
+      }).join('') : '<div class="no-items">No recent bookings</div>';
+      $('#recentBookings').innerHTML = html;
+      $$('.viewBooking').forEach(b => b.onclick = () => viewBooking(b.dataset.id));
+
+      // stats
+      const revenue = tickets.reduce((s,t)=> s + (Number(t.amount)||0),0);
+      $('#statRevenue').textContent = `Total revenue: ₹${revenue}`;
+      const thisMonth = new Date().toISOString().slice(0,7);
+      const bookingsThisMonth = tickets.filter(t => (t.date || '').slice(0,7) === thisMonth).length;
+      $('#statThisMonth').textContent = `Bookings this month (${thisMonth}): ${bookingsThisMonth}`;
+      // popular
+      const byTrain = {};
+      tickets.forEach(t => { const name=(t.train && t.train.name) || '—'; byTrain[name] = (byTrain[name]||0)+1; });
+      const entries = Object.entries(byTrain).sort((a,b)=> b[1]-a[1]);
+      $('#statPopular').textContent = entries.length ? `${entries[0][0]} (${entries[0][1]} bookings)` : '—';
+    }
+
+    function viewBooking(id){
+      const tickets = readTickets();
+      const t = tickets.find(x=>x.bookingId===id);
+      if(!t) return alert('Booking not found');
+      // build passenger list text
+      const pList = Array.isArray(t.passengers) ? t.passengers : (t.passenger ? [t.passenger] : []);
+      const pText = pList.length ? pList.map(p => `${p.name} (${p.age}, ${p.gender})`).join('\n') : '—';
+      alert(`Booking ${t.bookingId}\nTrain: ${t.train ? t.train.name : '—'}\nRoute: ${t.train ? t.train.from+'→'+t.train.to : '—'}\nDate: ${t.date}\nPassengers:\n${pText}\nAmount: ₹${t.amount}\nPayment: ${t.paymentMethod}`);
+    }
+
+    // ---- Trains page ----
+    // elements
+    const elTrainsList = $('#trainsList');
+    const elSearchTrains = $('#searchTrains');
+    const elTfId = $('#tfId'), elTfName = $('#tfName'), elTfFrom = $('#tfFrom'), elTfTo = $('#tfTo'), elTfTime = $('#tfTime'), elTfFare = $('#tfFare');
+    $('#btnAddTrain').onclick = () => { clearTrainForm(); $('#trainFormTitle').textContent = 'Add Train'; scrollTo(elTfName); };
+    $('#btnCancelTrain').onclick = clearTrainForm;
+    $('#btnSaveTrain').onclick = saveTrainFromForm;
+    elSearchTrains.oninput = () => renderTrains(elSearchTrains.value);
+
+    function scrollTo(el){ el && el.scrollIntoView({behavior:'smooth',block:'center'}); }
+    function clearTrainForm(){ elTfId.value=''; elTfName.value=''; elTfFrom.value=''; elTfTo.value=''; elTfTime.value=''; elTfFare.value=''; $('#trainFormTitle').textContent = 'Add Train'; }
+
+    function renderTrains(filter=''){
+      const list = readTrains();
+      const q = (filter||'').toLowerCase();
+      const out = list.filter(t => !q || (t.name+' '+t.from+' '+t.to).toLowerCase().includes(q));
+      if(!out.length){ elTrainsList.innerHTML = '<div class="no-items">No trains</div>'; return; }
+      elTrainsList.innerHTML = out.map(t => `
+        <div style="padding:10px;border-bottom:1px solid #f1f4f4;display:flex;justify-content:space-between">
+          <div>
+            <div style="font-weight:700">${t.name}</div>
+            <div class="small-muted">${t.from} → ${t.to} • ${t.time} • ₹${t.fare}</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-ghost editTrain" data-id="${t.id}">Edit</button>
+            <button class="btn btn-danger delTrain" data-id="${t.id}">Delete</button>
+          </div>
+        </div>
+      `).join('');
+      $$('.editTrain').forEach(b => b.onclick = () => editTrain(Number(b.dataset.id)));
+      $$('.delTrain').forEach(b => b.onclick = () => { if(confirm('Delete train?')) { deleteTrain(Number(b.dataset.id)); }});
+    }
+
+    function editTrain(id){
+      const tr = readTrains().find(x=>x.id===id);
+      if(!tr) return alert('Train not found');
+      elTfId.value = tr.id; elTfName.value = tr.name; elTfFrom.value = tr.from; elTfTo.value = tr.to; elTfTime.value = tr.time; elTfFare.value = tr.fare;
+      $('#trainFormTitle').textContent = 'Edit Train';
+      scrollTo(elTfName);
+    }
+
+    function deleteTrain(id){
+      const arr = readTrains().filter(x=>x.id!==id);
+      saveTrains(arr);
+      renderTrains(elSearchTrains.value);
+      renderDashboard();
+      alert('Train deleted');
+    }
+
+    function saveTrainFromForm(){
+      const name = elTfName.value.trim(), from = elTfFrom.value.trim(), to = elTfTo.value.trim(), time = elTfTime.value.trim(), fare = Number(elTfFare.value);
+      if(!name||!from||!to||!time||!fare) return alert('Fill all train fields (fare numeric)');
+      const list = readTrains();
+      if(elTfId.value){
+        const id = Number(elTfId.value);
+        const idx = list.findIndex(x=>x.id===id);
+        if(idx>=0) list[idx] = { id, name, from, to, time, fare };
+        else list.unshift({ id, name, from, to, time, fare });
+      } else {
+        const id = list.length ? Math.max(...list.map(x=>x.id))+1 : 1;
+        list.unshift({ id, name, from, to, time, fare });
+      }
+      saveTrains(list);
+      clearTrainForm();
+      renderTrains();
+      renderDashboard();
+      alert('Train saved');
+    }
+
+    // ---- Bookings page ----
+    const elBookingsTable = $('#bookingsTable'), elSearchBookings = $('#searchBookings'), elFilterBookingDate = $('#filterBookingDate'), btnExportBookings = $('#btnExportBookings');
+    elSearchBookings.oninput = () => renderBookings();
+    elFilterBookingDate.onchange = () => renderBookings();
+    btnExportBookings.onclick = () => exportAllBookingsCSV();
+
+    function renderBookings(){
+      const q = (elSearchBookings.value || '').toLowerCase();
+      const dateFilter = elFilterBookingDate.value || '';
+      const tickets = readTickets().filter(t => {
+        const matchBooking = (t.bookingId||'').toLowerCase().includes(q);
+        const matchTrain = t.train && t.train.name && t.train.name.toLowerCase().includes(q);
+        const passengersNames = (t.passengers || []).map(p => (p.name||'').toLowerCase()).join(' ');
+        const matchPassenger = passengersNames.includes(q);
+        return (!q || matchBooking || matchTrain || matchPassenger) && (!dateFilter || t.date === dateFilter);
+      });
+
+      if(!tickets.length){ elBookingsTable.innerHTML = '<div class="no-items">No bookings found</div>'; return; }
+
+      elBookingsTable.innerHTML = `<table><thead><tr><th>Booking ID</th><th>Train</th><th>Date</th><th>Passengers</th><th>Amount</th><th></th></tr></thead><tbody>` + tickets.map(t => {
+        const pList = (t.passengers || []).map(p => p.name + (p.age ? ` (${p.age})` : '')).join(', ');
+        return `
+        <tr>
+          <td>${t.bookingId}</td>
+          <td>${t.train ? (t.train.name + ' ('+ t.train.from+'→'+t.train.to +')') : '—' }</td>
+          <td>${t.date}</td>
+          <td>${pList || '—'}</td>
+          <td>₹${t.amount}</td>
+          <td style="text-align:right"><button class="btn btn-ghost viewB" data-id="${t.bookingId}">View</button> <button class="btn btn-danger delB" data-id="${t.bookingId}">Delete</button></td>
+        </tr>
+      `}).join('') + `</tbody></table>`;
+      $$('.viewB').forEach(b => b.onclick = () => viewBooking(b.dataset.id));
+      $$('.delB').forEach(b => b.onclick = () => { if(confirm('Delete booking?')) { deleteBooking(b.dataset.id); }});
+    }
+
+    function deleteBooking(id){
+      let arr = readTickets();
+      arr = arr.filter(x => x.bookingId !== id);
+      saveTickets(arr);
+      // remove single ticket if it matches
+      const single = localStorage.getItem(SINGLE_TICKET_KEY);
+      if(single) { try{ const s = JSON.parse(single); if(s.bookingId === id) localStorage.removeItem(SINGLE_TICKET_KEY); }catch(e){} }
+      renderBookings(); renderDashboard(); alert('Booking deleted');
+    }
+
+    // ---- Users page ----
+    const elUsersTable = $('#usersTable'), elSearchUsers = $('#searchUsers');
+    elSearchUsers.oninput = () => renderUsers();
+
+    function renderUsers(){
+      const users = readUsersFromTickets();
+      const q = (elSearchUsers.value || '').toLowerCase();
+      const out = users.filter(u => !q || u.name.toLowerCase().includes(q));
+      if(!out.length){ elUsersTable.innerHTML = '<div class="no-items">No users</div>'; return; }
+      elUsersTable.innerHTML = `<table><thead><tr><th>User</th><th>Bookings</th><th></th></tr></thead><tbody>` + out.map(u => `
+        <tr>
+          <td>${u.name} <div class="small-muted">${u.gender} • ${u.age} yrs</div></td>
+          <td>${u.bookings.length} booking(s)</td>
+          <td style="text-align:right"><button class="btn btn-ghost viewUser" data-name="${encodeURIComponent(u.name)}">View</button></td>
+        </tr>
+      `).join('') + `</tbody></table>`;
+      $$('.viewUser').forEach(b => b.onclick = () => { const name = decodeURIComponent(b.dataset.name); viewUser(name); });
+    }
+
+    function viewUser(name){
+      const tickets = readTickets().filter(t => {
+        const pList = t.passengers || [];
+        return pList.some(p => p.name === name);
+      });
+      if(!tickets.length) return alert('No bookings for user');
+      alert(`Bookings for ${name}:\n` + tickets.map(t => `${t.bookingId} • ${t.train ? t.train.name : ''} • ${t.date}`).join('\n'));
+    }
+
+    // ---- Reports (charts) ----
+    let chartBookingsPerTrain = null, chartRevenueByTrain = null, chartMonthly = null;
+    function renderReports(){
+      const tickets = readTickets();
+      const trains = readTrains();
+      const byTrainCount = {}, byTrainRevenue = {};
+      tickets.forEach(t => { const name = (t.train && t.train.name) || '—'; byTrainCount[name] = (byTrainCount[name]||0)+1; byTrainRevenue[name] = (byTrainRevenue[name]||0) + (Number(t.amount)||0); });
+      const labels = Object.keys(byTrainCount).length ? Object.keys(byTrainCount) : trains.map(x=>x.name);
+      const counts = labels.map(l => byTrainCount[l] || 0);
+      const revenues = labels.map(l => byTrainRevenue[l] || 0);
+
+      // bookings per train
+      const ctx1 = $('#chartBookingsPerTrain').getContext('2d');
+      if(chartBookingsPerTrain) chartBookingsPerTrain.destroy();
+      chartBookingsPerTrain = new Chart(ctx1, {
+        type:'bar',
+        data:{ labels, datasets:[{ label:'Bookings', data:counts }] },
+        options:{ responsive:true, plugins:{ legend:{ display:false } } }
+      });
+
+      // revenue by train
+      const ctx2 = $('#chartRevenueByTrain').getContext('2d');
+      if(chartRevenueByTrain) chartRevenueByTrain.destroy();
+      chartRevenueByTrain = new Chart(ctx2, {
+        type:'bar',
+        data:{ labels, datasets:[{ label:'Revenue', data:revenues }] },
+        options:{ responsive:true, plugins:{ legend:{ display:false } } }
+      });
+
+      // monthly bookings (last 12 months)
+      const monthsMap = {};
+      tickets.forEach(t => {
+        const dt = (t.date || '').slice(0,7) || new Date().toISOString().slice(0,7);
+        monthsMap[dt] = (monthsMap[dt]||0)+1;
+      });
+      const months = Object.keys(monthsMap).sort();
+      const monthCounts = months.map(m => monthsMap[m]);
+      const ctx3 = $('#chartMonthly').getContext('2d');
+      if(chartMonthly) chartMonthly.destroy();
+      chartMonthly = new Chart(ctx3, {
+        type:'line',
+        data:{ labels: months, datasets:[{ label:'Bookings', data: monthCounts, fill:true, tension:0.3 }] },
+        options:{ responsive:true, plugins:{ legend:{ display:false } } }
+      });
+    }
+
+    // ---- Utilities: CSV export ----
+    function ticketsToCSV(rows){
+      const header = ['Booking ID','Train','From','To','Departure','Date','Class','Passengers','Amount','Payment Method','Booked At'];
+      const lines = [header.join(',')];
+      rows.forEach(r => {
+        const passengers = (r.passengers || []).map(p => `${p.name}${p.age ? ' ('+p.age+')' : ''}`).join('; ');
+        const fields = [
+          r.bookingId || '',
+          (r.train && r.train.name) || '',
+          (r.train && r.train.from) || '',
+          (r.train && r.train.to) || '',
+          (r.train && r.train.time) || '',
+          r.date || '',
+          r.travelClass || '',
+          passengers,
+          r.amount || '',
+          r.paymentMethod || '',
+          r.bookedAt || ''
+        ];
+        const esc = fields.map(f => `"${String(f).replace(/"/g,'""')}"`);
+        lines.push(esc.join(','));
+      });
+      return lines.join('\n');
+    }
+
+    function exportAllBookingsCSV(){
+      const rows = readTickets();
+      if(!rows.length) return alert('No bookings to export');
+      const csv = ticketsToCSV(rows);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'trainlink_bookings_' + (new Date().toISOString().slice(0,10)) + '.csv';
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    // ---- Sync latest frontend ticket into tickets history ----
+    function syncLatestTicketToHistory(){
+      const singleRaw = localStorage.getItem(SINGLE_TICKET_KEY);
+      if(!singleRaw) return;
+      try{
+        const t0 = JSON.parse(singleRaw);
+        const normalized = normalizeTicket(t0);
+        if(!normalized || !normalized.bookingId) return;
+        const hist = readTickets();
+        if(!hist.find(x=>x.bookingId===normalized.bookingId)){
+          hist.unshift(normalized);
+          saveTickets(hist);
+        }
+      } catch(e){ console.error(e); }
+    }
+
+    // ---- seed demo tickets (for quick demo) ----
+    function seedDemoTickets(){
+      const trains = readTrains();
+      const samplePassengers = [
+        {name:'Asha Patel', age:28, gender:'Female'},
+        {name:'Ravi Kumar', age:34, gender:'Male'},
+        {name:'Priya Singh', age:22, gender:'Female'},
+        {name:'Suresh Rao', age:45, gender:'Male'},
+      ];
+      const hist = readTickets();
+      for(let i=0;i<8;i++){
+        const tr = trains[Math.floor(Math.random()*trains.length)];
+        // random 1-3 passengers
+        const pcount = 1 + Math.floor(Math.random()*3);
+        const pList = [];
+        for(let j=0;j<pcount;j++){
+          const p = samplePassengers[Math.floor(Math.random()*samplePassengers.length)];
+          pList.push(Object.assign({}, p));
+        }
+        const date = new Date(Date.now() - Math.random()*1000*60*60*24*40);
+        const tck = {
+          bookingId: 'TL' + (Date.now() + i).toString().slice(-6) + Math.floor(Math.random()*900),
+          train: tr,
+          passengers: pList,
+          amount: tr.fare * pList.length,
+          date: date.toISOString().slice(0,10),
+          travelClass: ['Sleeper','AC 3 Tier','AC 2 Tier'][Math.floor(Math.random()*3)],
+          bookedAt: new Date().toLocaleString(),
+          paymentMethod: Math.random()>0.4 ? 'card' : 'upi'
+        };
+        hist.unshift(tck);
+      }
+      saveTickets(hist);
+      loadAll();
+      alert('Seeded demo bookings');
+    }
+
+    // ---- helpers: load/render all ----
+    function updateCounts(){
+      $('#countTrains').textContent = readTrains().length;
+      $('#countBookings').textContent = readTickets().length;
+      $('#countUsers').textContent = readUsersFromTickets().length;
+      $('#kpiTrains').textContent = readTrains().length;
+      $('#kpiBookings').textContent = readTickets().length;
+      $('#kpiUsers').textContent = readUsersFromTickets().length;
+    }
+
+    function loadAll(){
+      renderDashboard();
+      renderTrains();
+      renderBookings();
+      renderUsers();
+      renderReports();
+      updateCounts();
+    }
+
+    // ---- delete all storage (careful) ----
+    $('#btnClearStorage').onclick = () => {
+      if(!confirm('Clear ALL localStorage data for demo? This will remove trains and bookings.')) return;
+      localStorage.clear();
+      saveTrains(DEMO_TRAINS.slice());
+      saveTickets([]);
+      loadAll();
+      alert('Storage cleared and demo trains restored');
+    };
+
+    // ---- wire other buttons ----
+    $('#btnSeed').onclick = () => seedDemoTickets();
+    $('#btnRefresh').onclick = () => loadAll();
+    $('#btnExportBookings').onclick = () => exportAllBookingsCSV();
+
+    // ---- initial setup on load ----
+    (function init(){
+      // ensure trains exist
+      if(!localStorage.getItem(TRAINS_KEY)) saveTrains(DEMO_TRAINS.slice());
+      // ensure tickets key exists (may be empty)
+      if(!localStorage.getItem(TICKETS_KEY)) localStorage.setItem(TICKETS_KEY, JSON.stringify([]));
+      loadAll();
+    })();
+
+    // listen for storage changes (in case frontend updates)
+    window.addEventListener('storage', (e) => {
+      if(e.key === SINGLE_TICKET_KEY || e.key === TICKETS_KEY || e.key === TRAINS_KEY) {
+        loadAll();
+      }
+    });
+
+    // initial page
+    showPage('dashboard');
+
+    // ---- Expose some functions to console for convenience ----
+    window.TLAdmin = { readTrains, saveTrains, readTickets, saveTickets, seedDemoTickets, exportAllBookingsCSV };
+
+  })();
+  }
+  </script>
+  
+</body>
+</html>
